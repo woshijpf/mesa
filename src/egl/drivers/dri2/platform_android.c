@@ -812,6 +812,7 @@ droid_add_configs_for_visuals(_EGLDriver *drv, _EGLDisplay *dpy)
 static int
 droid_open_device(void)
 {
+#ifdef HAS_GRALLOC_DRM_HEADERS
    const hw_module_t *mod;
    int fd = -1, err;
 
@@ -829,6 +830,9 @@ droid_open_device(void)
    }
 
    return (fd >= 0) ? dup(fd) : -1;
+#else
+   return loader_open_device("/dev/dri/renderD128");
+#endif
 }
 
 /* support versions < JellyBean */
