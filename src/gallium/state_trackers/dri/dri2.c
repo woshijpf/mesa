@@ -83,6 +83,10 @@ static int convert_fourcc(int format, int *dri_components_p)
       format = __DRI_IMAGE_FORMAT_GR88;
       dri_components = __DRI_IMAGE_COMPONENTS_RG;
       break;
+   case __DRI_IMAGE_FOURCC_YVU420:
+      format = __DRI_IMAGE_FORMAT_NONE;
+      dri_components = __DRI_IMAGE_COMPONENTS_Y_U_V;
+      break;
    default:
       return -1;
    }
@@ -146,6 +150,9 @@ static enum pipe_format dri2_format_to_pipe_format (int format)
    case __DRI_IMAGE_FORMAT_GR88:
       pf = PIPE_FORMAT_RG88_UNORM;
       break;
+//   case __DRI_IMAGE_FORMAT_YVU420:
+//      pf = PIPE_FORMAT_YV12;
+//      break;
    default:
       pf = PIPE_FORMAT_NONE;
       break;
@@ -780,8 +787,8 @@ dri2_create_image_from_winsys(__DRIscreen *_screen,
    tex_usage = PIPE_BIND_RENDER_TARGET | PIPE_BIND_SAMPLER_VIEW;
 
    pf = dri2_format_to_pipe_format (format);
-   if (pf == PIPE_FORMAT_NONE)
-      return NULL;
+//   if (pf == PIPE_FORMAT_NONE)
+//      return NULL;
 
    img = CALLOC_STRUCT(__DRIimageRec);
    if (!img)
@@ -843,13 +850,16 @@ dri2_create_image_from_fd(__DRIscreen *_screen,
                           int *dri_components, void *loaderPrivate)
 {
    struct winsys_handle whandle;
-   int format;
+   int format, i;
    __DRIimage *img = NULL;
    unsigned err = __DRI_IMAGE_ERROR_SUCCESS;
 
-   if (num_fds != 1) {
-      err = __DRI_IMAGE_ERROR_BAD_MATCH;
-      goto exit;
+   /* We only support all planes from the same bo */
+   for (i = 0; i < num_fds; i++) {
+      if (fds[0] != fds[i]) {
+         err = __DRI_IMAGE_ERROR_BAD_MATCH;
+         goto exit;
+      }
    }
 
    format = convert_fourcc(fourcc, dri_components);
@@ -873,6 +883,14 @@ dri2_create_image_from_fd(__DRIscreen *_screen,
                                        &whandle, loaderPrivate);
    if(img == NULL)
       err = __DRI_IMAGE_ERROR_BAD_ALLOC;
+
+   if (*dri_components == __DRI_IMAGE_COMPONENTS_Y_U_V) {
+      for (i = 0; i < 3; i++) {
+         img->offsets[i] = offsets[i];
+         img->strides[i] = strides[i];
+      }
+   }
+
 
 exit:
    if (error)

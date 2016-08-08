@@ -113,6 +113,13 @@ struct __DRIimageRec {
 
    void *loader_private;
 
+   /*
+    * Need to save these here between calls to
+    * image_from_names and calls to image_from_planar.
+    */
+   uint32_t strides[3];
+   uint32_t offsets[3];
+
    /**
     * Provided by EGL_EXT_image_dma_buf_import.
     */
