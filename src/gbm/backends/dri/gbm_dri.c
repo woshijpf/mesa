@@ -580,7 +580,7 @@ gbm_dri_bo_write(struct gbm_bo *_bo, const void *buf, size_t count)
 }
 
 static int
-gbm_dri_bo_get_fd(struct gbm_bo *_bo)
+gbm_dri_bo_get_fd(struct gbm_bo *_bo, size_t plane)
 {
    struct gbm_dri_device *dri = gbm_dri_device(_bo->gbm);
    struct gbm_dri_bo *bo = gbm_dri_bo(_bo);
@@ -719,8 +719,12 @@ gbm_dri_bo_import(struct gbm_device *gbm,
    case GBM_BO_IMPORT_FD:
    {
       struct gbm_import_fd_data *fd_data = buffer;
-      int stride = fd_data->stride, offset = 0;
-      int dri_format;
+      int stride[3], offset[3], fds[3];
+      int dri_format, num_fds = 1;
+
+      fds[0] = fd_data->fd;
+      stride[0] = fd_data->stride;
+      offset[0] = 0;
 
       switch (fd_data->format) {
       case GBM_BO_FORMAT_XRGB8888:
@@ -729,6 +733,15 @@ gbm_dri_bo_import(struct gbm_device *gbm,
       case GBM_BO_FORMAT_ARGB8888:
          dri_format = GBM_FORMAT_ARGB8888;
          break;
+      case GBM_FORMAT_YVU420:
+         num_fds = 3;
+         fds[1] = fd_data->fd;
+         stride[1] = fd_data->stride / 2;
+         offset[1] = fd_data->stride * fd_data->height;
+         fds[2] = fd_data->fd;
+         stride[2] = fd_data->stride / 2;
+         offset[2] = offset[1] + (fd_data->stride * fd_data->height);
+         // fall thru
       default:
          dri_format = fd_data->format;
       }
@@ -737,8 +750,8 @@ gbm_dri_bo_import(struct gbm_device *gbm,
                                              fd_data->width,
                                              fd_data->height,
                                              dri_format,
-                                             &fd_data->fd, 1,
-                                             &stride, &offset,
+                                             fds, num_fds,
+                                             stride, offset,
                                              NULL);
       if (image == NULL) {
          errno = EINVAL;
@@ -781,7 +794,7 @@ gbm_dri_bo_import(struct gbm_device *gbm,
    dri->image->queryImage(bo->image, __DRI_IMAGE_ATTRIB_STRIDE,
                           (int*)&bo->base.base.stride);
    dri->image->queryImage(bo->image, __DRI_IMAGE_ATTRIB_HANDLE,
-                          &bo->base.base.handle.s32);
+                          &bo->base.base.handles[0].s32);
 
    return &bo->base.base;
 }
@@ -825,7 +838,7 @@ create_dumb(struct gbm_device *gbm,
    bo->base.base.height = height;
    bo->base.base.stride = create_arg.pitch;
    bo->base.base.format = format;
-   bo->base.base.handle.u32 = create_arg.handle;
+   bo->base.base.handles[0].u32 = create_arg.handle;
    bo->handle = create_arg.handle;
    bo->size = create_arg.size;
 
@@ -865,6 +878,7 @@ gbm_dri_bo_create(struct gbm_device *gbm,
    bo->base.base.width = width;
    bo->base.base.height = height;
    bo->base.base.format = format;
+   bo->base.base.num_planes = 1;
 
    switch (format) {
    case GBM_FORMAT_RGB565:
@@ -890,6 +904,12 @@ gbm_dri_bo_create(struct gbm_device *gbm,
    case GBM_FORMAT_XRGB2101010:
       dri_format = __DRI_IMAGE_FORMAT_XRGB2101010;
       break;
+   case GBM_FORMAT_YVU420:
+      dri_format = __DRI_IMAGE_FORMAT_R8;
+      dri_use |=__DRI_IMAGE_USE_LINEAR;
+      bo->base.base.num_planes = 3;
+      height += height / 2;
+      break;
    default:
       errno = EINVAL;
       goto failed;
@@ -914,9 +934,11 @@ gbm_dri_bo_create(struct gbm_device *gbm,
       goto failed;
 
    dri->image->queryImage(bo->image, __DRI_IMAGE_ATTRIB_HANDLE,
-                          &bo->base.base.handle.s32);
+                          &bo->base.base.handles[0].s32);
    dri->image->queryImage(bo->image, __DRI_IMAGE_ATTRIB_STRIDE,
-                          (int *) &bo->base.base.stride);
+                          (int *) &bo->base.base.strides[0]);
+   dri->image->queryImage(bo->image, __DRI_IMAGE_ATTRIB_NUM_PLANES,
+                          (int *) &bo->base.base.num_planes);
 
    return &bo->base.base;
 
