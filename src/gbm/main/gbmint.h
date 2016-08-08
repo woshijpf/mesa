@@ -75,7 +75,7 @@ struct gbm_device {
                                void **map_data);
    void (*bo_unmap)(struct gbm_bo *bo, void *map_data);
    int (*bo_write)(struct gbm_bo *bo, const void *buf, size_t data);
-   int (*bo_get_fd)(struct gbm_bo *bo, size_t plane);
+   int (*bo_get_fd)(struct gbm_bo *bo);
    void (*bo_destroy)(struct gbm_bo *bo);
 
    struct gbm_surface *(*surface_create)(struct gbm_device *gbm,
@@ -88,8 +88,6 @@ struct gbm_device {
    void (*surface_destroy)(struct gbm_surface *surface);
 };
 
-#define GBM_MAX_PLANES 3
-
 /**
  * The allocated buffer object.
  *
@@ -101,11 +99,7 @@ struct gbm_bo {
    uint32_t height;
    uint32_t stride;
    uint32_t format;
-   size_t num_planes;
-   union gbm_bo_handle handles[GBM_MAX_PLANES];
-   uint32_t offsets[GBM_MAX_PLANES];
-   uint32_t sizes[GBM_MAX_PLANES];
-   uint32_t strides[GBM_MAX_PLANES];
+   union gbm_bo_handle  handle;
    void *user_data;
    void (*destroy_user_data)(struct gbm_bo *, void *);
 };
