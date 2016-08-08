@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <assert.h>
 
 #ifdef MAJOR_IN_MKDEV
 #include <sys/mkdev.h>
@@ -178,7 +179,7 @@ gbm_bo_get_height(struct gbm_bo *bo)
 GBM_EXPORT uint32_t
 gbm_bo_get_stride(struct gbm_bo *bo)
 {
-   return bo->stride;
+   return bo->strides[0];
 }
 
 /** Get the format of the buffer object
@@ -205,7 +206,7 @@ gbm_bo_get_format(struct gbm_bo *bo)
 GBM_EXPORT union gbm_bo_handle
 gbm_bo_get_handle(struct gbm_bo *bo)
 {
-   return bo->handle;
+   return bo->handles[0];
 }
 
 /** Get a DMA-BUF file descriptor for the buffer object
@@ -221,9 +222,49 @@ gbm_bo_get_handle(struct gbm_bo *bo)
 GBM_EXPORT int
 gbm_bo_get_fd(struct gbm_bo *bo)
 {
-   return bo->gbm->bo_get_fd(bo);
+   return bo->gbm->bo_get_fd(bo, 0);
 }
 
+GBM_EXPORT size_t
+gbm_bo_get_num_planes(struct gbm_bo *bo)
+{
+  return bo->num_planes;
+}
+
+GBM_EXPORT union gbm_bo_handle
+gbm_bo_get_plane_handle(struct gbm_bo *bo, size_t plane)
+{
+  assert(plane < bo->num_planes);
+  return bo->handles[plane];
+}
+
+GBM_EXPORT int
+gbm_bo_get_plane_fd(struct gbm_bo *bo, size_t plane)
+{
+  assert(plane < bo->num_planes);
+  return bo->gbm->bo_get_fd(bo, plane);
+}
+
+GBM_EXPORT uint32_t
+gbm_bo_get_plane_offset(struct gbm_bo *bo, size_t plane)
+{
+  assert(plane < bo->num_planes);
+  return bo->offsets[plane];
+}
+
+GBM_EXPORT uint32_t
+gbm_bo_get_plane_size(struct gbm_bo *bo, size_t plane)
+{
+  assert(plane < bo->num_planes);
+  return bo->sizes[plane];
+}
+
+GBM_EXPORT uint32_t
+gbm_bo_get_plane_stride(struct gbm_bo *bo, size_t plane)
+{
+  assert(plane < bo->num_planes);
+  return bo->strides[plane];
+}
 
 /** Write data into the buffer object
  *
