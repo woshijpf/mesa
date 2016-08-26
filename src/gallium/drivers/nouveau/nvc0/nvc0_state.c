@@ -1316,6 +1316,9 @@ nvc0_bind_images_range(struct nvc0_context *nvc0, const unsigned s,
       mask = ((1 << nr) - 1) << start;
       if (!(nvc0->images_valid[s] & mask))
          return false;
+      mask = ((1 << nr) - 1) << start;
+      if (!(nvc0->images_valid[s] & mask))
+         return false;
       for (i = start; i < end; ++i) {
          pipe_resource_reference(&nvc0->images[s][i].resource, NULL);
          if (nvc0->screen->base.class_3d >= GM107_3D_CLASS) {
