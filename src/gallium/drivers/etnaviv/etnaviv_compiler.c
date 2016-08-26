@@ -879,7 +879,7 @@ etna_amode(struct tgsi_ind_register indirect)
    case TGSI_SWIZZLE_W:
       return INST_AMODE_ADD_A_W;
    default:
-      assert(!"Invalid swizzle");
+      unreachable(!"Invalid swizzle");
    }
 }
 
