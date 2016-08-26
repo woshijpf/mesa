@@ -43,6 +43,11 @@ LOCAL_SHARED_LIBRARIES := \
 	libglapi \
 	libexpat \
 
+ifneq ($(filter etnaviv,$(MESA_GPU_DRIVERS)),)
+LOCAL_CFLAGS += -DGALLIUM_ETNAVIV
+gallium_DRIVERS += libmesa_winsys_etnaviv libmesa_pipe_etnaviv
+LOCAL_SHARED_LIBRARIES += libdrm_etnaviv
+endif
 ifneq ($(filter freedreno,$(MESA_GPU_DRIVERS)),)
 LOCAL_CFLAGS += -DGALLIUM_FREEDRENO
 gallium_DRIVERS += libmesa_winsys_freedreno libmesa_pipe_freedreno

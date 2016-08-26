@@ -31,7 +31,8 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := \
 	$(C_SOURCES) \
 	$(NIR_SOURCES) \
-	$(VL_STUB_SOURCES)
+	$(VL_STUB_SOURCES) \
+	$(RENDERONLY_SOURCES)
 
 LOCAL_C_INCLUDES := \
 	$(GALLIUM_TOP)/auxiliary/util
@@ -46,7 +47,7 @@ endif
 
 # We need libmesa_nir to get NIR's generated include directories.
 LOCAL_MODULE := libmesa_gallium
-LOCAL_STATIC_LIBRARIES += libmesa_nir
+LOCAL_STATIC_LIBRARIES += libmesa_nir libmesa_loader
 
 # generate sources
 LOCAL_MODULE_CLASS := STATIC_LIBRARIES

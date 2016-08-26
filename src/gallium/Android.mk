@@ -38,6 +38,11 @@ ifneq ($(filter swrast,$(MESA_GPU_DRIVERS)),)
 SUBDIRS += winsys/sw/dri drivers/softpipe
 endif
 
+# etnaviv
+ifneq ($(filter etnaviv, $(MESA_GPU_DRIVERS)),)
+SUBDIRS += winsys/etnaviv/drm drivers/etnaviv drivers/renderonly
+endif
+
 # freedreno
 ifneq ($(filter freedreno, $(MESA_GPU_DRIVERS)),)
 SUBDIRS += winsys/freedreno/drm drivers/freedreno

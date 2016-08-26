@@ -35,6 +35,7 @@
 #include "state_tracker/drm_driver.h"
 #include "pipe/p_screen.h"
 #include "util/u_memory.h"
+#include "loader.h"
 
 struct pipe_screen *
 renderonly_screen_create(int fd, const struct renderonly_ops *ops, void *priv)
