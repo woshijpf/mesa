@@ -27,7 +27,7 @@
 #ifndef H_ETNAVIV_TEXTURE
 #define H_ETNAVIV_TEXTURE
 
-#include <libdrm/etnaviv_drmif.h>
+#include <etnaviv_drmif.h>
 
 #include "pipe/p_context.h"
 #include "pipe/p_state.h"
