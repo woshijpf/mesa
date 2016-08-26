@@ -350,5 +350,6 @@ etna_transfer_init(struct pipe_context *pctx)
    pctx->transfer_map = etna_transfer_map;
    pctx->transfer_flush_region = etna_transfer_flush_region;
    pctx->transfer_unmap = etna_transfer_unmap;
-   pctx->transfer_inline_write = u_default_transfer_inline_write;
+   pctx->buffer_subdata = u_default_buffer_subdata;
+   pctx->texture_subdata = u_default_texture_subdata;
 }
