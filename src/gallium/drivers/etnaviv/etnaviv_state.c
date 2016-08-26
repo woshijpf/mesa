@@ -87,7 +87,7 @@ etna_set_sample_mask(struct pipe_context *pctx, unsigned sample_mask)
 
 static void
 etna_set_constant_buffer(struct pipe_context *pctx, uint shader, uint index,
-      struct pipe_constant_buffer *cb)
+      const struct pipe_constant_buffer *cb)
 {
    struct etna_context *ctx = etna_context(pctx);
 
