@@ -254,11 +254,19 @@ void st_invalidate_state(struct gl_context * ctx, GLbitfield new_state)
       st->active_states = st_get_active_states(ctx);
    }
 
-   if (new_state & _NEW_TEXTURE)
+   if (new_state & _NEW_TEXTURE) {
       st->dirty |= st->active_states &
                    (ST_NEW_SAMPLER_VIEWS |
                     ST_NEW_SAMPLERS |
                     ST_NEW_IMAGE_UNITS);
+      // TODO we need to do this for all shader stages
+      if (st->fp && st->fp->Base.Base.ExternalSamplersUsed) {
+         /* TODO check if external imgs have actually changed # of
+          * samplers used (ie. between RGB / 2-plane YUV / 3-plane YUV)
+          */
+         st->dirty |= ST_NEW_FS_STATE;
+      }
+   }
 
    if (new_state & _NEW_PROGRAM_CONSTANTS)
       st->dirty |= st->active_states & ST_NEW_CONSTANTS;
