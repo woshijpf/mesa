@@ -24,6 +24,8 @@
 #include "util/u_inlines.h"
 #include "util/u_memory.h"
 
+#include "state_tracker/drm_driver.h"
+
 #include "virgl_context.h"
 #include "virgl_resource.h"
 #include "virgl_screen.h"
@@ -240,7 +242,7 @@ static void virgl_texture_transfer_unmap(struct pipe_context *ctx,
 
 
 static boolean
-vrend_resource_layout(struct virgl_texture *res,
+vrend_resource_layout(struct virgl_texture *res, uint32_t offset, uint32_t stride,
                       uint32_t *total_size)
 {
    struct pipe_resource *pt = &res->base.u.b;
@@ -260,8 +262,8 @@ vrend_resource_layout(struct virgl_texture *res,
       else
          slices = pt->array_size;
 
-      res->stride[level] = util_format_get_stride(pt->format, width);
-      res->level_offset[level] = buffer_size;
+      res->stride[level] = stride; //util_format_get_stride(pt->format, width);
+      res->level_offset[level] = offset + buffer_size;
 
       buffer_size += (util_format_get_nblocksy(pt->format, height) *
                       slices * res->stride[level]);
@@ -319,7 +321,7 @@ virgl_texture_from_handle(struct virgl_screen *vs,
    tex->base.u.b.screen = &vs->base;
    pipe_reference_init(&tex->base.u.b.reference, 1);
    tex->base.u.vtbl = &virgl_texture_vtbl;
-   vrend_resource_layout(tex, &size);
+   vrend_resource_layout(tex, whandle->offset, whandle->stride, &size);
 
    tex->base.hw_res = vs->vws->resource_create_from_handle(vs->vws, whandle);
    return &tex->base.u.b;
@@ -338,7 +340,7 @@ struct pipe_resource *virgl_texture_create(struct virgl_screen *vs,
    tex->base.u.b.screen = &vs->base;
    pipe_reference_init(&tex->base.u.b.reference, 1);
    tex->base.u.vtbl = &virgl_texture_vtbl;
-   vrend_resource_layout(tex, &size);
+   vrend_resource_layout(tex, 0, util_format_get_stride(template->format, template->width0), &size);
 
    vbind = pipe_to_virgl_bind(template->bind);
    tex->base.hw_res = vs->vws->resource_create(vs->vws, template->target, template->format, vbind, template->width0, template->height0, template->depth0, template->array_size, template->last_level, template->nr_samples, size);
