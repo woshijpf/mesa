@@ -489,6 +489,10 @@ st_create_vp_variant(struct st_context *st,
       if (key->passthrough_edgeflags)
          NIR_PASS_V(vpv->tgsi.ir.nir, nir_lower_passthrough_edgeflags);
 
+      if (unlikely(key->external.lower_nv12 || key->external.lower_iyuv)) {
+         assert(0);  // TODO
+      }
+
       st_finalize_nir(st, &stvp->Base.Base, vpv->tgsi.ir.nir);
 
       vpv->driver_shader = pipe->create_vs_state(pipe, &vpv->tgsi);
@@ -516,6 +520,21 @@ st_create_vp_variant(struct st_context *st,
             vpv->num_inputs++;
       } else
          fprintf(stderr, "mesa: cannot emulate deprecated features\n");
+   }
+
+   if (unlikely(key->external.lower_nv12 || key->external.lower_iyuv)) {
+      const struct tgsi_token *tokens;
+
+      tokens = st_tgsi_lower_yuv(vpv->tgsi.tokens,
+                                 ~stvp->Base.Base.SamplersUsed,
+                                 key->external.lower_nv12,
+                                 key->external.lower_iyuv);
+      if (tokens) {
+         tgsi_free_tokens(vpv->tgsi.tokens);
+         vpv->tgsi.tokens = tokens;
+      } else {
+         fprintf(stderr, "mesa: cannot create a shader for samplerExternalOES\n");
+      }
    }
 
    if (ST_DEBUG & DEBUG_TGSI) {
@@ -1539,16 +1558,25 @@ st_get_basic_variant(struct st_context *st,
       /* create new */
       v = CALLOC_STRUCT(st_basic_variant);
       if (v) {
+         struct pipe_shader_state cso = *tgsi;
+
+         if (unlikely(key->external.lower_nv12 || key->external.lower_iyuv)) {
+            assert(cso.type == PIPE_SHADER_IR_TGSI);
+            cso.tokens = st_tgsi_lower_yuv(cso.tokens, ~prog->SamplersUsed,
+                                           key->external.lower_nv12,
+                                           key->external.lower_iyuv);
+         }
+
          /* fill in new variant */
          switch (prog->Target) {
          case GL_TESS_CONTROL_PROGRAM_NV:
-            v->driver_shader = pipe->create_tcs_state(pipe, tgsi);
+            v->driver_shader = pipe->create_tcs_state(pipe, &cso);
             break;
          case GL_TESS_EVALUATION_PROGRAM_NV:
-            v->driver_shader = pipe->create_tes_state(pipe, tgsi);
+            v->driver_shader = pipe->create_tes_state(pipe, &cso);
             break;
          case GL_GEOMETRY_PROGRAM_NV:
-            v->driver_shader = pipe->create_gs_state(pipe, tgsi);
+            v->driver_shader = pipe->create_gs_state(pipe, &cso);
             break;
          default:
             assert(!"unhandled shader type");
@@ -1561,6 +1589,9 @@ st_get_basic_variant(struct st_context *st,
          /* insert into list */
          v->next = *variants;
          *variants = v;
+
+         if (cso.tokens != tgsi->tokens)
+            tgsi_free_tokens(cso.tokens);
       }
    }
 
@@ -1692,13 +1723,26 @@ st_get_cp_variant(struct st_context *st,
       /* create new */
       v = CALLOC_STRUCT(st_basic_variant);
       if (v) {
+         struct pipe_compute_state cso = *tgsi;
+
+         if (unlikely(key->external.lower_nv12 || key->external.lower_iyuv)) {
+            assert(cso.ir_type == PIPE_SHADER_IR_TGSI);
+            cso.prog = st_tgsi_lower_yuv(cso.prog,
+                                         ~stcp->Base.Base.SamplersUsed,
+                                         key->external.lower_nv12,
+                                         key->external.lower_iyuv);
+         }
+
          /* fill in new variant */
-         v->driver_shader = pipe->create_compute_state(pipe, tgsi);
+         v->driver_shader = pipe->create_compute_state(pipe, &cso);
          v->key = *key;
 
          /* insert into list */
          v->next = stcp->variants;
          stcp->variants = v;
+
+         if (cso.prog != tgsi->prog)
+            tgsi_free_tokens(cso.prog);
       }
    }
 
