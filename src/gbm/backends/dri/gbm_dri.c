@@ -896,9 +896,6 @@ gbm_dri_bo_create(struct gbm_device *gbm,
    case GBM_FORMAT_XRGB2101010:
       dri_format = __DRI_IMAGE_FORMAT_XRGB2101010;
       break;
-   case GBM_FORMAT_R8:
-      dri_format = __DRI_IMAGE_FORMAT_R8;
-      break;
    default:
       errno = EINVAL;
       goto failed;
