@@ -39,5 +39,7 @@ LOCAL_SRC_FILES := \
 	$(gbm_core_FILES) \
 	$(gbm_dri_FILES)
 
+LOCAL_SHARED_LIBRARIES := liblog
+
 include $(MESA_COMMON_MK)
 include $(BUILD_SHARED_LIBRARY)

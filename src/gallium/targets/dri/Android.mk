@@ -42,6 +42,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libdl \
 	libglapi \
 	libexpat \
+	liblog \
 
 ifneq ($(filter etnaviv,$(MESA_GPU_DRIVERS)),)
 LOCAL_CFLAGS += -DGALLIUM_ETNAVIV

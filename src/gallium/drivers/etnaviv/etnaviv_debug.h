@@ -76,4 +76,13 @@ extern int etna_mesa_debug; /* set in etna_screen.c from ETNA_DEBUG */
       printf("%s:%d: " fmt "\n", __FUNCTION__, __LINE__, ##__VA_ARGS__); \
    } while (0)
 
+#undef DBG
+#include <android/log.h>
+#define DBG(...) __android_log_print(ANDROID_LOG_INFO, "etnaviv", __VA_ARGS__)
+#undef DBG_F
+#define DBG_F(x, ...) __android_log_print(ANDROID_LOG_INFO, "etnaviv", __VA_ARGS__)
+#undef BUG
+#define BUG DBG
+
+
 #endif

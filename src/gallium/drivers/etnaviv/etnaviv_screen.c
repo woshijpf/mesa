@@ -236,7 +236,7 @@ etna_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
       return 0;
 
    default:
-      DBG("unknown param %d", param);
+//      DBG("unknown param %d", param);
       return 0;
    }
 }
@@ -336,7 +336,7 @@ etna_screen_get_shader_param(struct pipe_screen *pscreen, unsigned shader,
    case PIPE_SHADER_CAP_TGSI_ANY_INOUT_DECL_RANGE:
       return false;
    default:
-      DBG("unknown shader param %d", param);
+//      DBG("unknown shader param %d", param);
       return 0;
    }
    return 0;
@@ -425,12 +425,12 @@ etna_screen_is_format_supported(struct pipe_screen *pscreen,
    /* Always allowed */
    allowed |=
       usage & (PIPE_BIND_DISPLAY_TARGET | PIPE_BIND_SCANOUT | PIPE_BIND_SHARED |
-               PIPE_BIND_TRANSFER_READ | PIPE_BIND_TRANSFER_WRITE);
+               PIPE_BIND_TRANSFER_READ | PIPE_BIND_TRANSFER_WRITE | PIPE_BIND_SHADER_IMAGE);
 
    if (usage != allowed) {
-      DBG("not supported: format=%s, target=%d, sample_count=%d, "
-          "usage=%x, allowed=%x",
-          util_format_name(format), target, sample_count, usage, allowed);
+//      DBG("not supported: format=%s, target=%d, sample_count=%d, "
+//          "usage=%x, allowed=%x",
+//          util_format_name(format), target, sample_count, usage, allowed);
    }
 
    return usage == allowed;
@@ -625,6 +625,7 @@ etna_screen_bo_get_handle(struct pipe_screen *pscreen, struct etna_bo *bo,
       return TRUE;
    } else if (whandle->type == DRM_API_HANDLE_TYPE_FD) {
       whandle->handle = etna_bo_dmabuf(bo);
+   DBG("get_handle fd=%d\n", whandle->handle);
       return TRUE;
    } else {
       return FALSE;

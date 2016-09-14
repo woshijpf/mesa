@@ -259,6 +259,9 @@ static struct dri_extension_match gbm_swrast_device_extensions[] = {
    { NULL, 0, 0 }
 };
 
+#include <android/log.h>
+#define fprintf(x, ...) __android_log_print(ANDROID_LOG_INFO, "gbm-dri", __VA_ARGS__)
+
 static int
 dri_bind_extensions(struct gbm_dri_device *dri,
                     struct dri_extension_match *matches,
@@ -268,6 +271,7 @@ dri_bind_extensions(struct gbm_dri_device *dri,
    void *field;
 
    for (i = 0; extensions[i]; i++) {
+      fprintf(stderr, "gbm drv ext %s\n", extensions[i]->name);
       for (j = 0; matches[j].name; j++) {
          if (strcmp(extensions[i]->name, matches[j].name) == 0 &&
              extensions[i]->version >= matches[j].version) {
@@ -860,8 +864,10 @@ gbm_dri_bo_create(struct gbm_device *gbm,
    int dri_format;
    unsigned dri_use = 0;
 
-   if (usage & GBM_BO_USE_WRITE || dri->image == NULL)
+   if (usage & GBM_BO_USE_WRITE || dri->image == NULL) {
+      fprintf(stderr, "creating dumb buffer\n");
       return create_dumb(gbm, width, height, format, usage);
+   }
 
    bo = calloc(1, sizeof *bo);
    if (bo == NULL)

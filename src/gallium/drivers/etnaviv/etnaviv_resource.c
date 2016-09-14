@@ -143,7 +143,7 @@ etna_resource_alloc(struct pipe_screen *pscreen, unsigned layout,
    unsigned size;
 
    DBG_F(ETNA_DBG_RESOURCE_MSGS,
-         "target=%d, format=%s, %ux%ux%u, array_size=%u, "
+         "alloc: target=%d, format=%s, %ux%ux%u, array_size=%u, "
          "last_level=%u, nr_samples=%u, usage=%u, bind=%x, flags=%x",
          templat->target, util_format_name(templat->format), templat->width0,
          templat->height0, templat->depth0, templat->array_size,
@@ -213,9 +213,9 @@ etna_resource_alloc(struct pipe_screen *pscreen, unsigned layout,
    if (templat->bind & PIPE_BIND_SCANOUT)
       rsc->scanout = renderonly_scanout_for_resource(&rsc->base, screen->ro);
 
-   if (DBG_ENABLED(ETNA_DBG_ZERO)) {
+   if (1) { //DBG_ENABLED(ETNA_DBG_ZERO)) {
       void *map = etna_bo_map(bo);
-      memset(map, 0, size);
+      memset(map, 0xff, size);
    }
 
    return &rsc->base;
@@ -306,11 +306,11 @@ etna_resource_from_handle(struct pipe_screen *pscreen,
    struct pipe_resource *prsc = &rsc->base;
    struct pipe_resource *ptiled = NULL;
 
-   DBG("target=%d, format=%s, %ux%ux%u, array_size=%u, last_level=%u, "
-       "nr_samples=%u, usage=%u, bind=%x, flags=%x",
+   DBG("from_handle: target=%d, format=%s, %ux%ux%u, array_size=%u, last_level=%u, "
+       "nr_samples=%u, usage=%u, bind=%x, flags=%d, handle=%d",
        tmpl->target, util_format_name(tmpl->format), tmpl->width0,
        tmpl->height0, tmpl->depth0, tmpl->array_size, tmpl->last_level,
-       tmpl->nr_samples, tmpl->usage, tmpl->bind, tmpl->flags);
+       tmpl->nr_samples, tmpl->usage, tmpl->bind, tmpl->flags, handle->handle);
 
    if (!rsc)
       return NULL;
@@ -349,6 +349,7 @@ etna_resource_from_handle(struct pipe_screen *pscreen,
    }
 
    if (handle->type == DRM_API_HANDLE_TYPE_SHARED && tmpl->bind & PIPE_BIND_RENDER_TARGET) {
+      DBG("creating tiled buffer for fd=%d", handle->handle);
       /* Render targets are linear in Xorg but must be tiled
       * here. It would be nice if dri_drawable_get_format()
       * set scanout for these buffers too. */

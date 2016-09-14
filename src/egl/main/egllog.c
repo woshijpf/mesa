@@ -45,7 +45,7 @@
 #include "egllog.h"
 
 #define MAXSTRING 1000
-#define FALLBACK_LOG_LEVEL _EGL_WARNING
+#define FALLBACK_LOG_LEVEL _EGL_DEBUG
 
 
 static struct {

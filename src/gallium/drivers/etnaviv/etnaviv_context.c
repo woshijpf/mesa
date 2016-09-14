@@ -52,6 +52,12 @@
 
 #include "hw/common.xml.h"
 
+#undef DBG
+#include <android/log.h>
+#define DBG(...) __android_log_print(ANDROID_LOG_INFO, "etnaviv", __VA_ARGS__)
+#undef BUG
+#define BUG DBG
+
 static void
 etna_context_destroy(struct pipe_context *pctx)
 {
@@ -218,6 +224,8 @@ etna_context_create(struct pipe_screen *pscreen, void *priv, unsigned flags)
    struct etna_context *ctx = CALLOC_STRUCT(etna_context);
    struct etna_screen *screen;
    struct pipe_context *pctx = NULL;
+
+    fprintf(stderr, "etna_context_create\n");
 
    if (ctx == NULL)
       return NULL;
