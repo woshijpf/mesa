@@ -40,26 +40,35 @@
 /* name of the directory in home */
 #define DD_DIR "ddebug_dumps"
 
+#include <android/log.h>
+#define fprintf(x, ...) __android_log_print(ANDROID_LOG_INFO, "mesa", __VA_ARGS__)
+
 static inline FILE *
 dd_get_debug_file(bool verbose)
 {
    static unsigned index;
    char proc_name[128], dir[256], name[512];
+   char *proc;
    FILE *f;
 
    if (!os_get_process_name(proc_name, sizeof(proc_name))) {
       fprintf(stderr, "dd: can't get the process name\n");
       return NULL;
    }
+   proc = strrchr(proc_name, '/');
+   if (proc)
+      proc++;
+   else
+      proc = proc_name;
 
-   snprintf(dir, sizeof(dir), "%s/"DD_DIR, debug_get_option("HOME", "."));
+   snprintf(dir, sizeof(dir), "%s/"DD_DIR, "/data/DATA");
 
    if (mkdir(dir, 0774) && errno != EEXIST) {
       fprintf(stderr, "dd: can't create a directory (%i)\n", errno);
       return NULL;
    }
 
-   snprintf(name, sizeof(name), "%s/%s_%u_%08u", dir, proc_name, getpid(), index++);
+   snprintf(name, sizeof(name), "%s/%s_%u_%08u", dir, proc, getpid(), index++);
    f = fopen(name, "w");
    if (!f) {
       fprintf(stderr, "dd: can't open file %s\n", name);
@@ -71,6 +80,8 @@ dd_get_debug_file(bool verbose)
 
    return f;
 }
+
+#undef fprintf
 
 static inline void
 dd_parse_apitrace_marker(const char *string, int len, unsigned *call_number)

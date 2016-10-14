@@ -27,7 +27,8 @@ GALLIUM_TOP := $(call my-dir)
 GALLIUM_COMMON_MK := $(GALLIUM_TOP)/Android.common.mk
 
 SUBDIRS := auxiliary
-SUBDIRS += auxiliary/pipe-loader
+SUBDIRS += auxiliary/pipe-loader \
+	drivers/ddebug
 
 #
 # Gallium drivers and their respective winsys

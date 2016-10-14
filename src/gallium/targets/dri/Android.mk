@@ -120,6 +120,7 @@ LOCAL_WHOLE_STATIC_LIBRARIES := \
 	libmesa_pipe_loader \
 	libmesa_util \
 	libmesa_loader \
+	libmesa_pipe_ddebug \
 
 LOCAL_STATIC_LIBRARIES :=
 

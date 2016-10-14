@@ -38,6 +38,8 @@
 #include "os/os_time.h"
 #include <inttypes.h>
 
+#include <android/log.h>
+#define fprintf(x, ...) ({ x == stderr ? __android_log_print(ANDROID_LOG_INFO, "mesa", __VA_ARGS__) : fprintf(x, __VA_ARGS__); })
 
 static FILE *
 dd_get_file_stream(struct dd_screen *dscreen, unsigned apitrace_call_number)
@@ -1216,7 +1218,7 @@ dd_context_flush_resource(struct pipe_context *_pipe,
                           struct pipe_resource *resource)
 {
    struct dd_context *dctx = dd_context(_pipe);
-   struct pipe_context *pipe = dctx->pipe;
+   struct pipe_context *pipe = _pipe ? dctx->pipe : NULL;
    struct dd_call call;
 
    call.type = CALL_FLUSH_RESOURCE;
