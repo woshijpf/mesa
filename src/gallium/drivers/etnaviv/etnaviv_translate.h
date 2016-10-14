@@ -440,6 +440,13 @@ translate_clear_color(enum pipe_format format,
                     (etna_cfloat_to_uintN(color->f[0], 8) << 16) |
                     (etna_cfloat_to_uintN(color->f[3], 8) << 24);
       break;
+   case PIPE_FORMAT_R8G8B8X8_UNORM:
+   case PIPE_FORMAT_R8G8B8A8_UNORM:
+      clear_value = etna_cfloat_to_uintN(color->f[0], 8) |
+                    (etna_cfloat_to_uintN(color->f[1], 8) << 8) |
+                    (etna_cfloat_to_uintN(color->f[2], 8) << 16) |
+                    (etna_cfloat_to_uintN(color->f[3], 8) << 24);
+      break;
    case PIPE_FORMAT_B4G4R4X4_UNORM:
    case PIPE_FORMAT_B4G4R4A4_UNORM:
       clear_value = etna_cfloat_to_uintN(color->f[2], 4) |
