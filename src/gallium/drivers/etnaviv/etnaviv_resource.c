@@ -348,7 +348,7 @@ etna_resource_from_handle(struct pipe_screen *pscreen,
       goto fail;
    }
 
-   if (handle->type == DRM_API_HANDLE_TYPE_SHARED && tmpl->bind & PIPE_BIND_RENDER_TARGET) {
+   if (0) { //handle->type == DRM_API_HANDLE_TYPE_FD && tmpl->bind & PIPE_BIND_SCANOUT && tmpl->bind & PIPE_BIND_RENDER_TARGET) {
       DBG("creating tiled buffer for fd=%d", handle->handle);
       /* Render targets are linear in Xorg but must be tiled
       * here. It would be nice if dri_drawable_get_format()
