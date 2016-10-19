@@ -34,7 +34,7 @@
 #  include <windows.h>
 #elif defined(__GLIBC__) || defined(__CYGWIN__)
 #  include <errno.h>
-#elif defined(PIPE_OS_BSD) || defined(PIPE_OS_APPLE)
+#elif defined(PIPE_OS_BSD) || defined(PIPE_OS_APPLE) || defined(PIPE_OS_ANDROID)
 #  include <stdlib.h>
 #elif defined(PIPE_OS_HAIKU)
 #  include <kernel/OS.h>
@@ -58,6 +58,7 @@ boolean
 os_get_process_name(char *procname, size_t size)
 {
    const char *name;
+
 
    /* First, check if the GALLIUM_PROCESS_NAME env var is set to
     * override the normal process name query.
@@ -86,7 +87,7 @@ os_get_process_name(char *procname, size_t size)
 
 #elif defined(__GLIBC__) || defined(__CYGWIN__)
       name = program_invocation_short_name;
-#elif defined(PIPE_OS_BSD) || defined(PIPE_OS_APPLE)
+#elif defined(PIPE_OS_BSD) || defined(PIPE_OS_APPLE) || defined(PIPE_OS_ANDROID)
       /* *BSD and OS X */
       name = getprogname();
 #elif defined(PIPE_OS_HAIKU)
