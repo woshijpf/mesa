@@ -40,6 +40,7 @@ struct renderonly_ops {
 };
 
 struct renderonly {
+   int fd;
    int kms_fd;
    const struct renderonly_ops *ops;
    struct pipe_screen *screen;
@@ -50,6 +51,7 @@ struct pipe_screen *
 renderonly_screen_create(int fd, const struct renderonly_ops *ops, void *priv);
 
 struct renderonly_scanout {
+   uint32_t prime_fd;
    uint32_t handle;
    uint32_t stride;
 
@@ -72,7 +74,12 @@ renderonly_get_handle(struct renderonly_scanout *scanout,
    if (!scanout)
       return FALSE;
 
-   handle->handle = scanout->handle;
+   fprintf(stderr, "renderonly get handle = %d\n", scanout->handle);
+
+   if (handle->type == DRM_API_HANDLE_TYPE_FD)
+         handle->handle = scanout->prime_fd;
+   else
+      handle->handle = scanout->handle;
    handle->stride = scanout->stride;
 
    return TRUE;

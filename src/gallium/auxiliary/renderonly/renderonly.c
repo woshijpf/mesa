@@ -24,6 +24,9 @@
  *    Christian Gmeiner <christian.gmeiner@gmail.com>
  */
 
+#include <android/log.h>
+#define fprintf(x, ...) __android_log_print(ANDROID_LOG_INFO, "renderonly", __VA_ARGS__)
+
 #include "renderonly/renderonly.h"
 
 #include <errno.h>
@@ -46,7 +49,8 @@ renderonly_screen_create(int fd, const struct renderonly_ops *ops, void *priv)
    if (!ro)
       return NULL;
 
-   ro->kms_fd = fd;
+   ro->fd = fd;
+   ro->kms_fd = loader_open_device("/dev/dri/controlD64");
    ro->ops = ops;
    ro->priv = priv;
 
@@ -94,10 +98,14 @@ use_kms_bumb_buffer(struct renderonly_scanout *scanout,
       goto out_free_dumb;
    }
 
+   scanout->prime_fd = prime_fd;
+
    /* import dumb buffer */
    handle.type = DRM_API_HANDLE_TYPE_FD;
    handle.handle = prime_fd;
    handle.stride = create_dumb.pitch;
+
+   fprintf(stderr, "importing dumb buffer: %d\n", prime_fd);
 
    scanout->prime = ro->screen->resource_from_handle(ro->screen, rsc,
          &handle, PIPE_HANDLE_USAGE_READ_WRITE);
