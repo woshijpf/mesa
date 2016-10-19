@@ -76,7 +76,7 @@ LIBDRM_NVVIEUX_REQUIRED=2.4.66
 LIBDRM_NOUVEAU_REQUIRED=2.4.66
 LIBDRM_FREEDRENO_REQUIRED=2.4.68
 LIBDRM_VC4_REQUIRED=2.4.69
-LIBDRM_ETNAVIV_REQUIRED=2.4.64
+LIBDRM_ETNAVIV_REQUIRED=2.4.71
 DRI2PROTO_REQUIRED=2.6
 DRI3PROTO_REQUIRED=1.0
 PRESENTPROTO_REQUIRED=1.0
@@ -2495,12 +2495,6 @@ if test -n "$with_gallium_drivers"; then
     done
 fi
 
-dnl We need to validate some needed dependencies for renderonly drivers.
-
-if test "x$HAVE_GALLIUM_ETNAVIV" != xyes -a "x$HAVE_GALLIUM_IMX" == xyes  ; then
-    AC_ERROR([Building with imx requires etnaviv])
-fi
-
 dnl Set LLVM_LIBS - This is done after the driver configuration so
 dnl that drivers can add additional components to LLVM_COMPONENTS.
 dnl Previously, gallium drivers were updating LLVM_LIBS directly
@@ -2706,7 +2700,6 @@ AC_CONFIG_FILES([Makefile
 		src/gallium/drivers/radeon/Makefile
 		src/gallium/drivers/radeonsi/Makefile
 		src/gallium/drivers/rbug/Makefile
-		src/gallium/drivers/renderonly/Makefile
 		src/gallium/drivers/softpipe/Makefile
 		src/gallium/drivers/svga/Makefile
 		src/gallium/drivers/swr/Makefile
